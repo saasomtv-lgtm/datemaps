@@ -51,18 +51,34 @@ router.post("/generate", upload.array("images", 10), async (req, res) => {
       analysis,
       socialProfiles: { instagram, spotify, tiktok },
       location: coords.formattedAddress,
-      date, budget,
+      date,
+      budget,
       places: contextPlaces,
     });
 
     if (!plan) throw new Error("Não foi possível gerar o plano. Tente novamente.");
 
-    res.json({ requestId, ...plan, userCoords: { lat: coords.lat, lng: coords.lng }, formattedLocation: coords.formattedAddress, generatedAt: new Date().toISOString() });
+    const response = {
+      requestId,
+      dateType:          plan.dateType,
+      matchScore:        plan.matchScore,
+      description:       plan.description,
+      tags:              plan.tags || [],
+      insights:          plan.insights || [],
+      tips:              plan.tips || [],
+      itinerary:         plan.itinerary || [],
+      places:            plan.places || [],
+      userCoords:        { lat: coords.lat, lng: coords.lng },
+      formattedLocation: coords.formattedAddress,
+      generatedAt:       new Date().toISOString(),
+    };
+
     console.log(`[${requestId}] ✅ Sucesso`);
+    res.json(response);
 
   } catch (err) {
     console.error(`[${requestId}] ➌ ${err.message}`);
-    res.status(500).json({ error: err.message || "Erro interno." });
+    res.status(500).json({ error: err.message || "Erro interno. Tente novamente." });
   }
 });
 
