@@ -1,1 +1,358 @@
-Frontend is served by the backend in production. See frontend/index.html in the zip file.
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DateMaps AI — Crie o date perfeito</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f6f5f3;color:#333;min-height:100vh}
+:root{--pink:#b03870;--red:#f83f3f;--bg:#f6f5f3;--white:#fff;--gray:#888}
+/* HEADER */
+.header{padding:24px 40px;display:flex;align-items:center;justify-content:space-between;background:#f6f5f3}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--pink),var(--red));border-radius:50%;display:flex;align-items:center;justify-content:center}
+.logo-text{font-size:1.2rem;font-weight:700;color:#333}
+/* HERO */
+.hero{max-width:720px;margin:60px auto 0;padding:0 24px;text-align:center}
+.hero h1{font-size:2.8rem;font-weight:700;color:#1a1a1a;line-height:1.2;margin-bottom:20px}
+.hero h1 span{background:linear-gradient(135deg,var(--pink),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.1rem;color:#555;margin-bottom:40px;line-height:1.7}
+/* STEPS */
+.steps{display:flex;justify-content:center;gap:8px;margin-bottom:48px;flex-wrap:wrap}
+.step{padding:8px 20px;border-radius:24px;font-size:.85rem;font-weight:600;cursor:pointer;border:2px solid transparent;transition:.2s;background:#e8e0d4;color:#888}
+.step.active{background:linear-gradient(135deg,var(--pink),var(--red));color:#fff}
+.step.done{background:#333;color:#fff}
+/* CARD */
+.card{max-width:580px;margin:0 auto 80px;background:#fff;border-radius:20px;padding:40px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.card-title{font-size:1.3rem;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.card-sub{font-size:.95rem;color:var(--gray);margin-bottom:32px}
+/* UPLOAD */
+.upload-area{border:2px dashed #ddd;border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa}
+.upload-area:hover,.upload-area.drag{border-color:var(--pink);background:#fff0f5}
+.upload-area svg{width:48px;height:48px;color:#ccc;margin-bottom:12px}
+.upload-area p{color:#888;font-size:.9rem}
+.upload-area strong{display:block;font-size:1rem;color:#555;margin-bottom:6px}
+.file-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.file-item{display:flex;align-items:center;gap:10px;background:#f8f8f8;border-radius:8px;padding:10px 14px;font-size:.85rem}
+.file-item svg{color:var(--pink);flex-shrink:0}
+/* INPUTS */
+.input-group{margin-bottom:20px}
+.input-group label{display:block;font-size:.85rem;font-weight:600;color:#555;margin-bottom:8px}
+.input-group input{width:100%;padding:12px 16px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:.95rem;outline:none;transition:.2s;background:#fafafa}
+.input-group input:focus{border-color:var(--pink);background:#fff}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* SLIDER */
+.slider-wrap{margin-bottom:24px}
+.slider-wrap label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;color:#555;margin-bottom:12px}
+.slider-wrap label span{color:var(--pink);font-size:1rem}
+input[type=range]{width:100%;accent-color:var(--pink);cursor:pointer}
+/* BUTTONS */
+.btn-primary{width:100%;padding:16px;background:linear-gradient(135deg,var(--pink),var(--red));color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;margin-top:8px}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:none;border:none;color:var(--pink);font-size:.9rem;cursor:pointer;padding:8px;margin-top:8px}
+/* LOADING */
+.loading{text-align:center;padding:40px}
+.spinner{width:48px;height:48px;border:3px solid #f0e0e8;border-top-color:var(--pink);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-steps{display:flex;flex-direction:column;gap:10px;margin-top:24px;text-align:left}
+.lstep{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f8f8f8;border-radius:8px;font-size:.85rem;color:#888}
+.lstep.active{background:#fff0f5;color:var(--pink);font-weight:600}
+.lstep.done{color:#333}
+/* RESULT */
+.result-header{text-align:center;margin-bottom:32px}
+.match-score{display:inline-flex;align-items:center;gap:8px;background:#fff0f5;padding:8px 20px;border-radius:24px;margin-bottom:16px}
+.match-score span{font-size:1.5rem;font-weight:800;color:var(--pink)}
+.result-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.tag{padding:4px 14px;background:#f0f0f0;border-radius:20px;font-size:.8rem;color:#555}
+.insights-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.insight{background:#f8f8f8;border-radius:10px;padding:14px;text-align:center}
+.insight-title{font-size:.75rem;color:#888;margin-bottom:4px}
+.insight-val{font-size:.85rem;font-weight:700;color:#333}
+.section-title{font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:16px;padding-bottom:8px;border-bottom:1.5px solid #f0f0f0}
+/* PLACES */
+.places-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.place-item{display:flex;gap:12px;padding:14px;border-radius:10px;background:#f8f8f8;cursor:pointer;transition:.2s;border:1.5px solid transparent}
+.place-item:hover,.place-item.sel{background:#fff0f5;border-color:var(--pink)}
+.place-rank{width:28px;height:28px;background:#333;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.place-item.sel .place-rank{background:var(--pink)}
+.place-info h4{font-size:.9rem;font-weight:700;margin-bottom:2px}
+.place-info p{font-size:.78rem;color:#888}
+.place-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.badge{padding:2px 8px;border-radius:10px;font-size:.72rem;background:#e8e8e8;color:#555}
+.badge.pink{background:#ffe0ec;color:var(--pink)}
+/* MAP */
+.map-wrap{border-radius:12px;overflow:hidden;background:#e8e0d4;position:relative;margin-bottom:28px;min-height:220px}
+.map-pins{position:absolute;inset:0}
+.map-pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.pin-bubble{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.75rem;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.pin-stem{width:3px;height:8px}
+.pin-tip{background:#333;color:#fff;padding:3px 8px;border-radius:4px;font-size:.7rem;white-space:nowrap;margin-bottom:4px;font-weight:600}
+/* ITINERARY */
+.itinerary{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.itin-item{display:flex;gap:12px;align-items:flex-start}
+.itin-time{font-size:.8rem;font-weight:700;color:var(--pink);width:44px;flex-shrink:0;padding-top:2px}
+.itin-line{display:flex;flex-direction:column;align-items:center}
+.itin-dot{width:8px;height:8px;background:var(--pink);border-radius:50%;margin-top:4px}
+.itin-dash{width:1.5px;background:#e0e0e0;flex:1;margin:4px 0}
+.itin-text h4{font-size:.85rem;font-weight:600;margin-bottom:2px}
+.itin-text p{font-size:.78rem;color:#888}
+/* TIPS */
+.tips{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.tip{background:#f8f8f8;border-radius:10px;padding:14px}
+.tip-title{font-size:.82rem;font-weight:700;color:#333;margin-bottom:4px}
+.tip-text{font-size:.8rem;color:#666;line-height:1.5}
+/* RESTART */
+.btn-restart{background:none;border:2px solid #e0e0e0;border-radius:10px;padding:12px 28px;font-size:.9rem;cursor:pointer;color:#555;transition:.2s;width:100%}
+.btn-restart:hover{border-color:var(--pink);color:var(--pink)}
+@media(max-width:600px){
+  .hero h1{font-size:2rem}
+  .card{padding:24px;margin:0 12px 60px}
+  .input-row{grid-template-columns:1fr}
+  .insights-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="logo" href="/">
+    <div class="logo-icon">
+      <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+    </div>
+    <span class="logo-text">DateMaps AI</span>
+  </a>
+</div>
+
+<div class="hero">
+  <h1>O date perfeito,<br><span>criado pela IA</span></h1>
+  <p>Faça upload dos prints da sua conversa e descubra o roteiro ideal baseado no perfil do casal.</p>
+</div>
+
+<div class="steps" id="stepsBar">
+  <div class="step active" id="stp1">1 · Conversa</div>
+  <div class="step" id="stp2">2 · Perfis</div>
+  <div class="step" id="stp3">3 · Local</div>
+  <div class="step" id="stp4">4 · Orçamento</div>
+</div>
+
+<div class="card" id="appCard">
+  <!-- Step 1 -->
+  <div id="step1">
+    <div class="card-title">Prints da conversa</div>
+    <div class="card-sub">Envie screenshots da conversa para analisarmos o estilo do casal.</div>
+    <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+      <strong>Arraste ou clique para enviar</strong>
+      <p>JPG, PNG ou WEBP · Máx 10 arquivos</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" multiple hidden onchange="onFiles(this.files)">
+    <div class="file-list" id="fileList"></div>
+    <button class="btn-primary" id="btn1" onclick="goStep(2)" disabled>Continuar</button>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="step2" hidden>
+    <div class="card-title">Redes sociais</div>
+    <div class="card-sub">Opcional — ajuda a personalizar ainda mais as sugestões.</div>
+    <div class="input-row">
+      <div class="input-group"><label>Instagram</label><input id="ig" placeholder="@usuario"></div>
+      <div class="input-group"><label>Spotify</label><input id="sp" placeholder="Nome do usuário"></div>
+    </div>
+    <div class="input-group"><label>TikTok</label><input id="tt" placeholder="@usuario"></div>
+    <button class="btn-primary" onclick="goStep(3)">Continuar</button>
+    <button class="btn-secondary" onclick="goStep(3)">Pular esta etapa</button>
+  </div>
+
+  <!-- Step 3 -->
+  <div id="step3" hidden>
+    <div class="card-title">Local e data</div>
+    <div class="card-sub">Onde acontecerá o date?</div>
+    <div class="input-group"><label>Cidade *</label><input id="loc" placeholder="Ex: São Paulo, SP" oninput="checkStep3()"></div>
+    <div class="input-group"><label>Quando</label><input id="dt" type="date"></div>
+    <button class="btn-primary" id="btn3" onclick="goStep(4)" disabled>Continuar</button>
+  </div>
+
+  <!-- Step 4 -->
+  <div id="step4" hidden>
+    <div class="card-title">Orçamento</div>
+    <div class="card-sub">Quanto pretendem gastar por pessoa?</div>
+    <div class="slider-wrap">
+      <label>Orçamento <span id="budgetVal">R$ 200</span></label>
+      <input type="range" id="budget" min="50" max="1000" step="50" value="200" oninput="document.getElementById('budgetVal').textContent='R$ '+this.value">
+    </div>
+    <button class="btn-primary" onclick="generate()">Gerar meu date ✨</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="stepLoading" hidden>
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="font-weight:700;font-size:1rem;margin-bottom:4px">Criando seu date perfeito...</p>
+      <p style="font-size:.85rem;color:#888">Isso leva cerca de 30 segundos</p>
+      <div class="loading-steps">
+        <div class="lstep active" id="ls1">📸 Analisando conversa...</div>
+        <div class="lstep" id="ls2">🗺️ Buscando lugares...</div>
+        <div class="lstep" id="ls3">✨ Montando roteiro...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="stepResult" hidden></div>
+</div>
+
+<script>
+const API_BASE = "";
+let files = [], resultData = null, selectedPlace = 0;
+
+function onDrag(e,on){e.preventDefault();document.getElementById('dropZone').classList.toggle('drag',on)}
+function onDrop(e){e.preventDefault();onFiles(e.dataTransfer.files)}
+function onFiles(f){
+  files=[...f].slice(0,10);
+  const list=document.getElementById('fileList');
+  list.innerHTML=files.map(f=>`<div class="file-item">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    <span>${f.name}</span><span style="color:#ccc;margin-left:auto">${(f.size/1024).toFixed(0)}KB</span>
+  </div>`).join('');
+  document.getElementById('btn1').disabled=files.length===0;
+}
+function checkStep3(){document.getElementById('btn3').disabled=!document.getElementById('loc').value.trim()}
+
+function goStep(n){
+  [1,2,3,4,'Loading','Result'].forEach(s=>document.getElementById('step'+s).hidden=true);
+  document.getElementById('step'+n).hidden=false;
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('stp'+i);
+    el.className='step'+(i<n?' done':i===n?' active':'');
+  }
+}
+
+async function generate(){
+  goStep('Loading');
+  const ls=[document.getElementById('ls1'),document.getElementById('ls2'),document.getElementById('ls3')];
+  let li=0;
+  const timer=setInterval(()=>{
+    ls.forEach(l=>l.className='lstep');
+    if(li<3){ls[li].className='lstep active';ls[li].classList.add('active');}
+    li=(li+1)%3;
+  },3000);
+
+  try{
+    const fd=new FormData();
+    files.forEach(f=>fd.append('images',f));
+    fd.append('instagram',document.getElementById('ig').value);
+    fd.append('spotify',document.getElementById('sp').value);
+    fd.append('tiktok',document.getElementById('tt').value);
+    fd.append('location',document.getElementById('loc').value);
+    fd.append('date',document.getElementById('dt').value);
+    fd.append('budget',document.getElementById('budget').value);
+
+    const res=await fetch(API_BASE+'/api/date/generate',{method:'POST',body:fd});
+    const data=await res.json();
+    clearInterval(timer);
+    if(!res.ok||data.error)throw new Error(data.error||'Erro ao gerar plano');
+    resultData=data;
+    showResult();
+  }catch(e){
+    clearInterval(timer);
+    alert('Erro: '+e.message+'
+
+Tente novamente.');
+    goStep(4);
+  }
+}
+
+function showResult(){
+  const d=resultData;
+  const places=d.places||[];
+  const html=`
+    <div class="result-header">
+      <div class="match-score">💝 <span>${d.matchScore||85}%</span> de compatibilidade</div>
+      <div style="font-size:1.3rem;font-weight:800;margin-bottom:8px">${d.dateType||'Date Especial'}</div>
+      <p style="color:#666;font-size:.9rem;margin-bottom:12px">${d.description||''}</p>
+      <div class="result-tags">${(d.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+    ${d.insights?.length?`<div class="insights-row">${d.insights.slice(0,3).map(i=>`<div class="insight"><div class="insight-title">${i.title}</div><div class="insight-val">${i.value}</div></div>`).join('')}</div>`:''}
+    <div class="section-title">📍 Lugares sugeridos</div>
+    <div class="map-wrap" style="height:220px" id="mapWrap">${buildMap(places,0)}</div>
+    <div class="places-list">${places.map((p,i)=>`<div class="place-item${i===0?' sel':''}" onclick="selectPlace(${i})">
+      <div class="place-rank">${p.rank||i+1}</div>
+      <div class="place-info">
+        <h4>${p.name}</h4>
+        <p>${p.address||''}</p>
+        <div class="place-meta">
+          ${p.rating?`<span class="badge pink">⭐ ${p.rating}</span>`:''}
+          ${p.price?`<span class="badge">${p.price}</span>`:''}
+          ${p.distance?`<span class="badge">${p.distance}</span>`:''}
+          ${p.openNow!==false?`<span class="badge">Aberto</span>`:''}
+        </div>
+        ${p.reason?`<p style="margin-top:6px;font-size:.78rem;color:var(--pink)">${p.reason}</p>`:''}
+      </div>
+    </div>`).join('')}</div>
+    ${(d.itinerary?.length)?`<div class="section-title">🗓️ Roteiro</div><div class="itinerary">${d.itinerary.map((it,i)=>`<div class="itin-item">
+      <div class="itin-time">${it.time}</div>
+      <div class="itin-line"><div class="itin-dot"></div>${i<d.itinerary.length-1?`<div class="itin-dash"></div>`:''}</div>
+      <div class="itin-text"><h4>${it.activity}${it.place?` · ${it.place}`:''}</h4>${it.tip?`<p>${it.tip}</p>`:''}</div>
+    </div>`).join('')}</div>`:''}
+    ${(d.tips?.length)?`<div class="section-title">💡 Dicas</div><div class="tips">${d.tips.map(t=>`<div class="tip"><div class="tip-title">${t.title}</div><div class="tip-text">${t.text}</div></div>`).join('')}</div>`:''}
+    <button class="btn-restart" onclick="restart()">↩ Criar outro date</button>
+  `;
+  document.getElementById('stepResult').innerHTML=html;
+  document.getElementById('stepResult').hidden=false;
+  document.getElementById('stepLoading').hidden=true;
+  for(let i=1;i<=4;i++) document.getElementById('stp'+i).className='step done';
+}
+
+function buildMap(places,active){
+  const pos=[{x:'35%',y:'30%'},{x:'62%',y:'55%'},{x:'75%',y:'22%'},{x:'20%',y:'65%'},{x:'50%',y:'75%'}];
+  const pins=places.map((p,i)=>{
+    const pp=pos[i]||{x:'50%',y:'50%'};
+    const sel=i===active;
+    return `<div class="map-pin" style="left:${pp.x};top:${pp.y}" onclick="selectPlace(${i})">
+      ${sel?`<div class="pin-tip">${p.name}</div>`:''}
+      <div class="pin-bubble" style="background:${sel?'var(--pink)':'#333'};width:${sel?36:28}px;height:${sel?36:28}px">${p.rank||i+1}</div>
+      <div class="pin-stem" style="background:${sel?'var(--pink)':'#333'}"></div>
+    </div>`;
+  }).join('');
+  return `<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 600 220" preserveAspectRatio="xMidYMid slice">
+    <rect width="600" height="220" fill="#e8e0d4"/>
+    <rect x="20" y="15" width="120" height="70" rx="4" fill="#ddd8ce"/>
+    <rect x="160" y="15" width="90" height="50" rx="4" fill="#ddd8ce"/>
+    <rect x="270" y="15" width="140" height="80" rx="4" fill="#ddd8ce"/>
+    <rect x="430" y="15" width="100" height="55" rx="4" fill="#ddd8ce"/>
+    <rect x="20" y="110" width="100" height="80" rx="4" fill="#ddd8ce"/>
+    <rect x="140" y="105" width="120" height="90" rx="4" fill="#ddd8ce"/>
+    <rect x="280" y="110" width="90" height="75" rx="4" fill="#ddd8ce"/>
+    <rect x="390" y="90" width="140" height="110" rx="4" fill="#ddd8ce"/>
+    <rect x="0" y="98" width="600" height="10" fill="#f2ede4"/>
+    <rect x="148" y="0" width="10" height="220" fill="#f2ede4"/>
+    <rect x="258" y="0" width="10" height="220" fill="#f2ede4"/>
+    <rect x="380" y="0" width="10" height="220" fill="#f2ede4"/>
+    <rect x="188" y="52" width="60" height="44" rx="5" fill="#c8dcb8"/>
+  </svg><div class="map-pins">${pins}</div>`;
+}
+
+function selectPlace(i){
+  selectedPlace=i;
+  document.getElementById('mapWrap').innerHTML=buildMap(resultData.places||[],i);
+  document.querySelectorAll('.place-item').forEach((el,j)=>el.classList.toggle('sel',j===i));
+}
+
+function restart(){
+  files=[];resultData=null;selectedPlace=0;
+  document.getElementById('fileList').innerHTML='';
+  document.getElementById('btn1').disabled=true;
+  document.getElementById('ig').value='';
+  document.getElementById('sp').value='';
+  document.getElementById('tt').value='';
+  document.getElementById('loc').value='';
+  document.getElementById('dt').value='';
+  document.getElementById('budget').value=200;
+  document.getElementById('budgetVal').textContent='R$ 200';
+  goStep(1);
+}
+</script>
+</body>
+</html>
